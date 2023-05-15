@@ -1,0 +1,86 @@
+### robot tests
+## redirects
++ Sysctl_net_ipv4_conf_all_accept_redirects
++ Sysctl_net_ipv4_conf_default_accept_redirects
+- Sysctl_net_ipv4_conf_eth0_accept_redirects # based on _default_?
++ Sysctl_net_ipv6_conf_all_accept_redirects
++ Sysctl_net_ipv6_conf_default_accept_redirects
+- Sysctl_net_ipv6_conf_eth0_accept_redirects # based on _default_?
+## source_route
++ Sysctl_net_ipv4_conf_default_accept_source_route
+- Sysctl_net_ipv4_conf_eth0_accept_source_route # based on _default_?
+
+
+
+
+### mail
+## SP0 changes
+## redirects
+Sysctl_net_ipv4_conf_all_accept_redirects
+Sysctl_net_ipv6_conf_all_accept_redirects
+Sysctl_net_ipv4_conf_default_accept_redirects
+Sysctl_net_ipv6_conf_default_accept_redirects
+      net.ipv[46].conf.*.accept_redirects: no change in kernel, default is the same (1 for host, 0 for router)
+      Change comes from aaa_base:
+      - Add patch git-07-82a17f1689e8957635c8ccaae7c9b3bff7f94d49.patch
+       * add sysctl.d/51-network.conf to tighten network security a bit see also (boo#1146866) (jira#SLE-9132)
+
+Sysctl_net_ipv4_conf_all_rp_filter
+      net.ipv4.conf.*.rp_filter: no change in kernel, default is 0 in both
+      /usr/lib/sysctl.d/50-default.conf:net.ipv4.conf.all.rp_filter = 2
+      Change  comes   from aaa_base:
+      Add patch git-15-27e2c6180a45cca63d71ffa5de7b32dec749d2cd.patch change rp_filter to 2 to follow the current default (bsc#1160735)
+
+Sysctl_net_ipv4_conf_default_accept_source_route
+      net.ipv4.conf.*.accept_source_route: no change in kernel, default is 0 in both
+      Change comes from aaa_base:
+      - Add patch git-07-82a17f1689e8957635c8ccaae7c9b3bff7f94d49.patch
+       * add sysctl.d/51-network.conf to tighten network security a bit see also (boo#1146866) (jira#SLE-9132)
+
+## SP1/SP2 changes
+Sysctl_net_ipv4_neigh_default_unres_qlen
+Sysctl_net_ipv6_neigh_default_unres_qlen
+Sysctl_net_ipv4_neigh_default_unres_qlen_bytes
+Sysctl_net_ipv6_neigh_default_unres_qlen_bytes
+      net.ipv[46].neigh.*.unres_qlen: changed in upstream 4.14, commit eaa72dc47488 (fixes an issue)
+
+Sysctl_net_ipv4_tcp_allowed_congestion_control
+Sysctl.Sysctl_net_ipv4_tcp_available_congestion_control
+      net.ipv4.tcp_allowed_congestion_control: order depends on
+      initialization order and has no practical meaning
+
+Sysctl_net_ipv4_tcp_limit_output_bytes
+      net.ipv4.tcp_limit_output_bytes: changed in upstream 5.0, commit
+      c73e5807e4f6 (performance optimization)
+
+Sysctl_net_ipv4_tcp_max_syn_backlog
+      net.ipv4.tcp_max_syn_backlog: changed in upstream 5.4, commit
+      623d0c2db020 (high load performance, backported for bsc#1154353)
+
+Sysctl_net_ipv4_tcp_tw_reuse
+      net.ipv4.tcp_tw_reuse: changed in upstream 4.18, commit 79e9fed46038
+      (introduces new value 2 for better high load behaviour of local connections)
+
+Sysctl_net_ipv4_xfrm4_gc_thresh
+Sysctl_net_ipv6_xfrm4_gc_thresh
+      net.ipv6.xfrm6_gc_thresh: changed in upstream 4.14, commit
+      3c2a89ddc118 (size no longer limited by size of (removed) flow cache)
+
+Sysctl_user_max_inotify_instances
+Sysctl_user_max_inotify_watches
+      bsc#1168852, this is a bug.
+
+Sysctl_vm_hugepages_treat_as_movable
+     Removed by upstream d6cb41cc44c6 ("mm, hugetlb: remove hugepages_treat_as_movable sysctl") in 4.16.  not really applicable anymore because hugetlb pages are migrateable.  Thus the system behaves as if it was always enabled.
+
+Sysctl_vm_lowmem_reserve_ratio
+     result of d3cda2337bbc ("mm/page_alloc: don't reserve ZONE_HIGHMEM for ZONE_MOVABLE request") The 5th value is due to ZONE_DEVICE and value is 0. Changing it won't have any visible effect as device allocations don't fallback to other zones anyway.
+
+Sysctl_vm_nr_pdflush_threads
+     Removed by the upstream b35bd0d9f8a8 ("sysctl: remove /proc/sys/vm/nr_pdflush_threads") in 4.15 but it has been essentially unsuable since ages.
+
+Sysctl_vm_numa_zonelist_order
+     The "default" has been equal to "Node" for a long time. The other option was "Zone" which was removed by the upstream c9bff3eebc09 ("mm, page_alloc: rip out ZONELIST_ORDER_ZONE") because there were not usecases known for this functionality. As the only option left was "Node", it's listed there instead of "default".
+
+Sysctl_vm_watermark_boost_factor
+     15000 is a default value since the boosting has been introduced. We are still looking at the reason (and the tool) which changed the value.
